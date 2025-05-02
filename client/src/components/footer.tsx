@@ -7,21 +7,19 @@ export default function Footer() {
         <div className="max-w-6xl mx-auto">
           <div className="flex flex-col md:flex-row justify-between items-center mb-8">
             <div className="mb-6 md:mb-0">
-              <Link href="/">
-                <a className="flex items-center">
-                  <span className="text-2xl font-bold font-poppins">Mindful<span className="text-soft-coral">Blog</span></span>
-                </a>
+              <Link href="/" className="flex items-center">
+                <span className="text-2xl font-bold font-poppins">Mindful<span className="text-soft-coral">Blog</span></span>
               </Link>
               <p className="text-gray-500 mt-2 max-w-xs">A minimalist blog focused on mindful living, productivity, and personal growth.</p>
             </div>
             
             <div className="flex flex-col space-y-2">
               <h4 className="font-poppins font-semibold mb-2">Quick Links</h4>
-              <Link href="/">
-                <a className="text-gray-600 hover:text-muted-blue transition-colors">Home</a>
+              <Link href="/" className="text-gray-600 hover:text-muted-blue transition-colors">
+                Home
               </Link>
-              <Link href="/blog">
-                <a className="text-gray-600 hover:text-muted-blue transition-colors">Blog</a>
+              <Link href="/blog" className="text-gray-600 hover:text-muted-blue transition-colors">
+                Blog
               </Link>
               <a href="#contact" className="text-gray-600 hover:text-muted-blue transition-colors">Contact</a>
             </div>
