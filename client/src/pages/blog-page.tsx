@@ -8,6 +8,8 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Search, Loader2 } from "lucide-react";
+import { Skeleton } from "@/components/ui/skeleton";
+import { motion } from "framer-motion";
 
 export default function BlogPage() {
   const [searchQuery, setSearchQuery] = useState("");
@@ -100,11 +102,24 @@ export default function BlogPage() {
       </div>
       
       {/* Posts Grid */}
-      <section id="posts-grid" className="py-12 bg-white flex-1">
+      <motion.section
+        id="posts-grid"
+        className="py-12 bg-white flex-1"
+        initial={{ opacity: 0, y: 32 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.7, ease: "easeOut" }}
+      >
         <div className="container mx-auto px-4">
           {isLoading ? (
-            <div className="flex justify-center py-20">
-              <Loader2 className="h-12 w-12 animate-spin text-muted-blue" />
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+              {Array.from({ length: 6 }).map((_, i) => (
+                <div key={i} className="space-y-4">
+                  <Skeleton className="h-48 w-full rounded-lg" />
+                  <Skeleton className="h-6 w-3/4" />
+                  <Skeleton className="h-4 w-1/2" />
+                  <Skeleton className="h-4 w-1/3" />
+                </div>
+              ))}
             </div>
           ) : filteredPosts?.length === 0 ? (
             <div className="text-center py-20">
@@ -114,7 +129,13 @@ export default function BlogPage() {
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
               {currentPosts?.map((post) => (
-                <PostCard key={post.id} post={post} />
+                <motion.div
+                  key={post.id}
+                  whileHover={{ scale: 1.03, boxShadow: "0 8px 32px rgba(0,0,0,0.08)" }}
+                  transition={{ type: "spring", stiffness: 300 }}
+                >
+                  <PostCard post={post} />
+                </motion.div>
               ))}
             </div>
           )}
@@ -170,7 +191,7 @@ export default function BlogPage() {
             </div>
           )}
         </div>
-      </section>
+      </motion.section>
       
       <Footer />
     </div>

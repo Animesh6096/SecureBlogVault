@@ -16,6 +16,7 @@ import {
   AvatarImage,
   AvatarFallback,
 } from "@/components/ui/avatar";
+import { motion, AnimatePresence } from "framer-motion";
 
 interface NavbarProps {
   forceSolid?: boolean;
@@ -94,25 +95,32 @@ export default function Navbar({ forceSolid = false }: NavbarProps) {
                       </Avatar>
                     </Button>
                   </DropdownMenuTrigger>
-                  <DropdownMenuContent className="w-56" align="end" forceMount>
-                    <DropdownMenuLabel className="font-normal">
-                      <div className="flex flex-col space-y-1">
-                        <p className="text-sm font-medium leading-none">
-                          {user.username}
-                        </p>
-                      </div>
-                    </DropdownMenuLabel>
-                    <DropdownMenuSeparator />
-                    <DropdownMenuItem onClick={() => navigate("/dashboard")}>
-                      Dashboard
-                    </DropdownMenuItem>
-                    <DropdownMenuItem onClick={() => navigate("/profile")}>
-                      Profile
-                    </DropdownMenuItem>
-                    <DropdownMenuSeparator />
-                    <DropdownMenuItem onClick={handleLogout}>
-                      Log out
-                    </DropdownMenuItem>
+                  <DropdownMenuContent asChild className="w-56" align="end" forceMount>
+                    <motion.div
+                      initial={{ opacity: 0, y: -10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: -10 }}
+                      transition={{ duration: 0.2 }}
+                    >
+                      <DropdownMenuLabel className="font-normal">
+                        <div className="flex flex-col space-y-1">
+                          <p className="text-sm font-medium leading-none">
+                            {user.username}
+                          </p>
+                        </div>
+                      </DropdownMenuLabel>
+                      <DropdownMenuSeparator />
+                      <DropdownMenuItem onClick={() => navigate("/dashboard")}>
+                        Dashboard
+                      </DropdownMenuItem>
+                      <DropdownMenuItem onClick={() => navigate("/profile")}>
+                        Profile
+                      </DropdownMenuItem>
+                      <DropdownMenuSeparator />
+                      <DropdownMenuItem onClick={handleLogout}>
+                        Log out
+                      </DropdownMenuItem>
+                    </motion.div>
                   </DropdownMenuContent>
                 </DropdownMenu>
               </>
@@ -141,51 +149,59 @@ export default function Navbar({ forceSolid = false }: NavbarProps) {
         </div>
         
         {/* Mobile Navigation Menu */}
-        {mobileMenuOpen && (
-          <div className="md:hidden bg-white rounded-lg shadow-lg mt-2 absolute left-4 right-4">
-            <div className="flex flex-col p-4 space-y-3">
-              <Link href="/" className="text-dark-gray font-medium py-2 px-4 rounded hover:bg-soft-gray transition-colors" onClick={() => setMobileMenuOpen(false)}>
-                Home
-              </Link>
-              <Link href="/blog" className="text-dark-gray font-medium py-2 px-4 rounded hover:bg-soft-gray transition-colors" onClick={() => setMobileMenuOpen(false)}>
-                Blog
-              </Link>
-              <Link href="/contact" className="text-dark-gray font-medium py-2 px-4 rounded hover:bg-soft-gray transition-colors" onClick={() => setMobileMenuOpen(false)}>
-                Contact
-              </Link>
-              
-              {user ? (
-                <>
-                  <Link href="/create-post" className="text-dark-gray font-medium py-2 px-4 rounded hover:bg-soft-gray transition-colors" onClick={() => setMobileMenuOpen(false)}>
-                    New Post
-                  </Link>
-                  <Link href="/profile" className="text-dark-gray font-medium py-2 px-4 rounded hover:bg-soft-gray transition-colors" onClick={() => setMobileMenuOpen(false)}>
-                    Profile
-                  </Link>
+        <AnimatePresence>
+          {mobileMenuOpen && (
+            <motion.div
+              initial={{ opacity: 0, y: -20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -20 }}
+              transition={{ duration: 0.25 }}
+              className="md:hidden bg-white rounded-lg shadow-lg mt-2 absolute left-4 right-4"
+            >
+              <div className="flex flex-col p-4 space-y-3">
+                <Link href="/" className="text-dark-gray font-medium py-2 px-4 rounded hover:bg-soft-gray transition-colors" onClick={() => setMobileMenuOpen(false)}>
+                  Home
+                </Link>
+                <Link href="/blog" className="text-dark-gray font-medium py-2 px-4 rounded hover:bg-soft-gray transition-colors" onClick={() => setMobileMenuOpen(false)}>
+                  Blog
+                </Link>
+                <Link href="/contact" className="text-dark-gray font-medium py-2 px-4 rounded hover:bg-soft-gray transition-colors" onClick={() => setMobileMenuOpen(false)}>
+                  Contact
+                </Link>
+                
+                {user ? (
+                  <>
+                    <Link href="/create-post" className="text-dark-gray font-medium py-2 px-4 rounded hover:bg-soft-gray transition-colors" onClick={() => setMobileMenuOpen(false)}>
+                      New Post
+                    </Link>
+                    <Link href="/profile" className="text-dark-gray font-medium py-2 px-4 rounded hover:bg-soft-gray transition-colors" onClick={() => setMobileMenuOpen(false)}>
+                      Profile
+                    </Link>
+                    <button 
+                      className="bg-soft-coral text-white py-2 px-4 rounded-md hover:bg-opacity-90 transition-colors"
+                      onClick={() => {
+                        handleLogout();
+                        setMobileMenuOpen(false);
+                      }}
+                    >
+                      Log out
+                    </button>
+                  </>
+                ) : (
                   <button 
-                    className="bg-soft-coral text-white py-2 px-4 rounded-md hover:bg-opacity-90 transition-colors"
+                    className="bg-muted-blue text-white py-2 px-4 rounded-md hover:bg-opacity-90 transition-colors"
                     onClick={() => {
-                      handleLogout();
+                      handleLogin();
                       setMobileMenuOpen(false);
                     }}
                   >
-                    Log out
+                    Login / Register
                   </button>
-                </>
-              ) : (
-                <button 
-                  className="bg-muted-blue text-white py-2 px-4 rounded-md hover:bg-opacity-90 transition-colors"
-                  onClick={() => {
-                    handleLogin();
-                    setMobileMenuOpen(false);
-                  }}
-                >
-                  Login / Register
-                </button>
-              )}
-            </div>
-          </div>
-        )}
+                )}
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
     </nav>
   );
