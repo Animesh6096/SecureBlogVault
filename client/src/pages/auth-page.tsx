@@ -28,8 +28,8 @@ type LoginValues = z.infer<typeof loginSchema>;
 
 const registerSchema = insertUserSchema.extend({
   confirmPassword: z.string().min(6, "Password must be at least 6 characters"),
-  terms: z.literal(true, {
-    errorMap: () => ({ message: "You must accept the terms and conditions" }),
+  terms: z.boolean().refine(val => val === true, {
+    message: "You must accept the terms and conditions",
   }),
 }).refine(data => data.password === data.confirmPassword, {
   message: "Passwords do not match",
@@ -68,7 +68,7 @@ export default function AuthPage() {
       email: "",
       password: "",
       confirmPassword: "",
-      terms: false as any, // Cast to any to fix type issue with the literal true requirement
+      terms: false,
     },
   });
 
@@ -203,7 +203,15 @@ export default function AuthPage() {
                       <FormItem>
                         <FormLabel>Email</FormLabel>
                         <FormControl>
-                          <Input type="email" placeholder="Enter your email" {...field} />
+                          <Input 
+                            type="email" 
+                            placeholder="Enter your email" 
+                            value={field.value || ''} 
+                            onChange={field.onChange}
+                            onBlur={field.onBlur}
+                            name={field.name}
+                            ref={field.ref}
+                          />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
