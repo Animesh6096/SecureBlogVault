@@ -1,0 +1,130 @@
+Objective:
+Develop a clean, minimalistic blog website with cool and subtle design elements using React, Node.js, and Tailwind CSS. The design should be highly aesthetic, modern, and focused on a great user experience, using AI tools to help create and optimize it via Bolt.new.
+
+Design Style:
+1. Color Palette:
+Primary Colors:
+
+White (background) – to maintain a clean, bright, and open feel.
+
+Soft Gray (for section dividers, background elements) – to add depth while maintaining a minimalist look.
+
+Accent Colors:
+
+Muted Blue (#0077cc) – for buttons, links, and small interactive elements like hover effects.
+
+Soft Coral (#FF6B6B) – subtle highlights for call-to-action buttons, category tags, and interactive icons.
+
+Text Color:
+
+Dark Gray (#333333) for body text – providing excellent contrast on white backgrounds.
+
+Black for headlines and titles to make them stand out sharply.
+
+Additional Highlights:
+
+Use a Pastel Yellow (#F7D774) or Soft Lavender (#B19CD9) for subtle, yet modern visual cues in hover animations and icons.
+
+2. Typography:
+Font Family:
+
+Primary Font: Inter – Modern, clean, and highly readable. This font will be used for all body text and paragraph content.
+
+Headings Font: Poppins or Montserrat – Use for headings to give a more structured, bold presence. This font is perfect for a modern, sans-serif style that pairs well with Inter.
+
+Font Sizes:
+
+Body text: 16px for normal content and 18px for larger paragraphs.
+
+Titles: 36px for main post titles, with clear padding and spacing around them.
+
+Subheadings: 20px, with additional weight (semi-bold or bold).
+
+Line Height:
+
+Set the line height to 1.6 for body text to ensure readability and spacing.
+
+Set the line height for headings to 1.3 for a more compact, organized feel.
+
+3. Layout & Structure:
+Homepage Layout:
+
+Hero Section:
+
+Large image or video background with a faded overlay for text contrast.
+
+Use Tailwind's utilities (bg-opacity-70, text-white, etc.) for a subtle, effective overlay that doesn’t overpower the content.
+
+Center-align the blog name or tagline with big, bold text. Use Poppins/Montserrat here for emphasis.
+
+Featured Posts:
+
+Display posts in a two-column grid for larger screens and a single-column layout for mobile views. This is achieved with Tailwind's grid layout.
+
+Posts should be shown with large thumbnails, title, and a short description beneath each. Hover effects will slightly enlarge the post cards.
+
+Minimal Navigation Bar:
+
+Transparent background that transitions to a solid color when scrolled.
+
+Links will be text-white and have soft hover effects (change to muted blue).
+
+Use React Router for navigation, with simple routes (Home, Blog, About, Contact).
+
+Blog Post Pages:
+
+Single column layout with large body text.
+
+Use Tailwind's typography plugin (prose) for content styling.
+
+Image handling should ensure that all images are responsive (e.g., w-full, h-auto).
+
+For post titles, use Poppins/Montserrat in bold, with an emphasis on contrast with body text.
+
+Sidebar (Optional):
+
+Display recent posts, category tags, and email subscription form.
+
+Ensure the sidebar is fixed on the right side (in larger views) but can be collapsed for mobile devices.
+
+4. Interactive Design Elements:
+Hover Effects:
+
+Soft fade effect on hover for links, category tags, and buttons.
+
+Buttons (e.g., “Read More” links) will change from the muted blue to the soft coral color on hover.
+
+Blog post thumbnails will enlarge slightly on hover to create depth and interactivity.
+
+Scrolling Effects:
+
+Use smooth scroll for page navigation and image reveal (for blog posts, image pop-ins) as users scroll down.
+
+Animations:
+
+Subtle entrance animations on page load: fade-in effect for posts, menu items, and images.
+
+Subtle scale-up effect for call-to-action buttons like “Subscribe” or “Read More” on hover.
+
+5. Forms:
+Contact Form:
+
+Simple form with inputs for Name, Email, and Message.
+
+Use soft gray borders for the input fields and soft coral color on hover for inputs.
+
+Use subtle transitions when the user submits the form (e.g., change form button background to muted blue when clicked).
+
+6. Footer Design:
+A minimal footer with copyright text, social media links, and a short description or about section.
+
+Social media icons will be simple line icons (such as those from React Icons), with a hover effect that changes their color to the accent colors (muted blue or soft coral).
+
+7. Responsiveness:
+Ensure all components are responsive, using Tailwind's responsive utilities (such as lg:grid-cols-2, sm:w-full).
+
+Use Tailwind's mobile-first approach, ensuring smooth transitions between breakpoints.
+
+For mobile screens, collapse the navigation into a hamburger menu with React Hooks to manage the open/close state.
+
+Images and videos should scale automatically based on screen size (using object-fit: cover or w-full classes).
