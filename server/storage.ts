@@ -68,6 +68,14 @@ class DatabaseStorage implements IStorage {
     return newUser;
   }
 
+  async updateUser(id: number, data: { bio?: string; image?: string }): Promise<User> {
+    const [updatedUser] = await db.update(schema.users)
+      .set(data)
+      .where(eq(schema.users.id, id))
+      .returning();
+    return updatedUser;
+  }
+
   // Post operations
   async getAllPosts(search?: string, category?: string): Promise<Post[]> {
     let query = db.select().from(schema.posts);

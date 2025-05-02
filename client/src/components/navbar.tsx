@@ -13,25 +13,34 @@ import {
 } from "@/components/ui/dropdown-menu";
 import {
   Avatar,
+  AvatarImage,
   AvatarFallback,
 } from "@/components/ui/avatar";
 
-export default function Navbar() {
+interface NavbarProps {
+  forceSolid?: boolean;
+}
+
+export default function Navbar({ forceSolid = false }: NavbarProps) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [transparent, setTransparent] = useState(true);
   const [, navigate] = useLocation();
   const { user, logoutMutation } = useAuth();
 
+  const PLACEHOLDER_IMAGE = "https://ui-avatars.com/api/?name=User&background=eee&color=888&size=128";
+
   useEffect(() => {
+    if (forceSolid) {
+      setTransparent(false);
+      return;
+    }
     const handleScroll = () => {
       setTransparent(window.scrollY < 50);
     };
-
     window.addEventListener("scroll", handleScroll);
     handleScroll(); // Check initial state
-
     return () => window.removeEventListener("scroll", handleScroll);
-  }, []);
+  }, [forceSolid]);
 
   const handleLogin = () => {
     navigate("/auth");
@@ -52,20 +61,22 @@ export default function Navbar() {
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center py-4">
           <Link href="/" className="flex items-center">
-            <span className={`text-2xl font-bold font-poppins ${transparent ? 'text-white' : 'text-dark-gray'}`}>
-              Mindful<span className="text-soft-coral">Blog</span>
+            <span className={`text-2xl font-bold font-poppins transition-colors duration-300 ${transparent ? 'text-white' : 'text-dark-gray'}`} style={{ textShadow: transparent ? '0 2px 8px rgba(0,0,0,0.3)' : 'none' }}>
+              <span className={transparent ? 'text-white' : 'text-dark-gray'}>Mindful</span><span className={transparent ? 'text-soft-coral' : 'text-soft-coral'}>Blog</span>
             </span>
           </Link>
           
           {/* Desktop Navigation */}
           <div className="hidden md:flex space-x-8 items-center">
-            <Link href="/" className={`nav-item ${transparent ? 'text-white' : 'text-dark-gray'} font-medium hover:text-muted-blue transition-colors`}>
+            <Link href="/" className={`nav-item font-medium hover:text-muted-blue transition-colors ${transparent ? 'text-white' : 'text-dark-gray'}`}>
               Home
             </Link>
-            <Link href="/blog" className={`nav-item ${transparent ? 'text-white' : 'text-dark-gray'} font-medium hover:text-muted-blue transition-colors`}>
+            <Link href="/blog" className={`nav-item font-medium hover:text-muted-blue transition-colors ${transparent ? 'text-white' : 'text-dark-gray'}`}>
               Blog
             </Link>
-            <a href="#contact" className={`nav-item ${transparent ? 'text-white' : 'text-dark-gray'} font-medium hover:text-muted-blue transition-colors`}>Contact</a>
+            <Link href="/contact" className={`nav-item font-medium hover:text-muted-blue transition-colors ${transparent ? 'text-white' : 'text-dark-gray'}`}>
+              Contact
+            </Link>
             
             {user ? (
               <>
@@ -76,6 +87,7 @@ export default function Navbar() {
                   <DropdownMenuTrigger asChild>
                     <Button variant="ghost" className="relative h-8 w-8 rounded-full">
                       <Avatar className="h-8 w-8">
+                        <AvatarImage src={user?.image || PLACEHOLDER_IMAGE} alt={user?.username || "User"} />
                         <AvatarFallback className="bg-muted-blue text-white">
                           {getUserInitials()}
                         </AvatarFallback>
@@ -138,7 +150,9 @@ export default function Navbar() {
               <Link href="/blog" className="text-dark-gray font-medium py-2 px-4 rounded hover:bg-soft-gray transition-colors" onClick={() => setMobileMenuOpen(false)}>
                 Blog
               </Link>
-              <a href="#contact" className="text-dark-gray font-medium py-2 px-4 rounded hover:bg-soft-gray transition-colors" onClick={() => setMobileMenuOpen(false)}>Contact</a>
+              <Link href="/contact" className="text-dark-gray font-medium py-2 px-4 rounded hover:bg-soft-gray transition-colors" onClick={() => setMobileMenuOpen(false)}>
+                Contact
+              </Link>
               
               {user ? (
                 <>

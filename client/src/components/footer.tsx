@@ -21,7 +21,7 @@ export default function Footer() {
               <Link href="/blog" className="text-gray-600 hover:text-muted-blue transition-colors">
                 Blog
               </Link>
-              <a href="#contact" className="text-gray-600 hover:text-muted-blue transition-colors">Contact</a>
+              <Link href="/contact" className="text-gray-600 hover:text-muted-blue transition-colors">Contact</Link>
             </div>
             
             <div className="flex flex-col space-y-2">

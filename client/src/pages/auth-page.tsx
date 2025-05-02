@@ -99,6 +99,7 @@ export default function AuthPage() {
             {/* Tab Navigation */}
             <div className="flex border-b mb-6">
               <button
+                type="button"
                 className={`flex-1 py-2 font-semibold text-center border-b-2 ${
                   isLogin ? "border-muted-blue text-dark-gray" : "border-transparent text-gray-500"
                 }`}
@@ -107,6 +108,7 @@ export default function AuthPage() {
                 Login
               </button>
               <button
+                type="button"
                 className={`flex-1 py-2 font-semibold text-center border-b-2 ${
                   !isLogin ? "border-muted-blue text-dark-gray" : "border-transparent text-gray-500"
                 }`}
@@ -118,7 +120,7 @@ export default function AuthPage() {
 
             {/* Login Form */}
             {isLogin ? (
-              <Form {...loginForm}>
+              <Form {...loginForm} key="login">
                 <form onSubmit={loginForm.handleSubmit(onLoginSubmit)} className="space-y-6">
                   <FormField
                     control={loginForm.control}
@@ -181,7 +183,7 @@ export default function AuthPage() {
                 </form>
               </Form>
             ) : (
-              <Form {...registerForm}>
+              <Form {...registerForm} key="register">
                 <form onSubmit={registerForm.handleSubmit(onRegisterSubmit)} className="space-y-6">
                   <FormField
                     control={registerForm.control}
@@ -190,7 +192,7 @@ export default function AuthPage() {
                       <FormItem>
                         <FormLabel>Username</FormLabel>
                         <FormControl>
-                          <Input placeholder="Choose a username" {...field} />
+                          <Input placeholder="Choose a username" autoComplete="off" {...field} />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -203,15 +205,7 @@ export default function AuthPage() {
                       <FormItem>
                         <FormLabel>Email</FormLabel>
                         <FormControl>
-                          <Input 
-                            type="email" 
-                            placeholder="Enter your email" 
-                            value={field.value || ''} 
-                            onChange={field.onChange}
-                            onBlur={field.onBlur}
-                            name={field.name}
-                            ref={field.ref}
-                          />
+                          <Input type="email" placeholder="Enter your email" autoComplete="off" {...field} />
                         </FormControl>
                         <FormMessage />
                       </FormItem>

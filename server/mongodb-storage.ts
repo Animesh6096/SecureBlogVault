@@ -16,6 +16,7 @@ export interface IStorage {
   getUser(id: string): Promise<IUser>;
   getUserByUsername(username: string): Promise<IUser | null>;
   createUser(user: Omit<InsertUser, "id">): Promise<IUser>;
+  updateUser(id: string, data: { bio?: string; image?: string }): Promise<IUser>;
   
   // Post methods
   getAllPosts(search?: string, category?: string): Promise<IPost[]>;
@@ -82,6 +83,12 @@ export class MongoDBStorage implements IStorage {
       console.error("Error creating user:", error);
       throw error;
     }
+  }
+  
+  async updateUser(id: string, data: { bio?: string; image?: string }): Promise<IUser> {
+    const updatedUser = await User.findByIdAndUpdate(id, data, { new: true });
+    if (!updatedUser) throw new Error(`User with id ${id} not found`);
+    return updatedUser;
   }
   
   // Post methods

@@ -8,6 +8,8 @@ export interface IUser extends Document {
   password: string;
   role: string;
   createdAt: Date;
+  bio: string;
+  image: string;
 }
 
 const UserSchema = new Schema<IUser>({
@@ -15,7 +17,9 @@ const UserSchema = new Schema<IUser>({
   email: { type: String, required: true, unique: true },
   password: { type: String, required: true },
   role: { type: String, default: 'user', enum: ['user', 'admin'] },
-  createdAt: { type: Date, default: Date.now }
+  createdAt: { type: Date, default: Date.now },
+  bio: { type: String },
+  image: { type: String },
 });
 
 // Post Schema

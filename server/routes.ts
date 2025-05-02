@@ -243,6 +243,26 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Profile endpoints
+  app.get("/api/profile", async (req, res) => {
+    if (!req.isAuthenticated()) return res.sendStatus(401);
+    const user = await storage.getUser(req.user.id);
+    res.json({
+      username: user.username,
+      email: user.email,
+      bio: user.bio || "",
+      image: user.image || "",
+    });
+  });
+
+  app.post("/api/profile", async (req, res) => {
+    if (!req.isAuthenticated()) return res.sendStatus(401);
+    const { bio, image } = req.body;
+    // Update user in DB
+    await storage.updateUser(req.user.id, { bio, image });
+    res.json({ success: true });
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }

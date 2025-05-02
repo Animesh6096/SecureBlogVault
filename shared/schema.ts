@@ -12,6 +12,8 @@ export const users = pgTable("users", {
   fullName: text("full_name"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   role: text("role").default("user").notNull(),
+  bio: text("bio"),
+  image: text("image"),
 });
 
 export const insertUserSchema = createInsertSchema(users, {

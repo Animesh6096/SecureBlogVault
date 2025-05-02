@@ -58,12 +58,11 @@ export default function BlogPage() {
       <Navbar />
       
       {/* Blog Header */}
-      <div className="bg-soft-gray py-24 px-4">
-        <div className="container mx-auto text-center">
-          <h1 className="text-4xl md:text-5xl font-bold mb-6 font-poppins">Our Blog</h1>
-          <p className="text-dark-gray text-lg max-w-2xl mx-auto">
-            Explore our collection of articles on mindfulness, productivity, and personal growth.
-          </p>
+      <div className="relative h-[50vh] md:h-[60vh] flex items-center justify-center bg-cover bg-center" style={{ backgroundImage: "url('https://images.unsplash.com/photo-1464983953574-0892a716854b?auto=format&fit=crop&w=1200&q=80')" }}>
+        <div className="absolute inset-0 bg-black bg-opacity-60"></div>
+        <div className="relative z-10 container mx-auto text-center">
+          <h1 className="text-4xl md:text-5xl font-bold mb-6 font-poppins text-white drop-shadow-lg">Our Blog</h1>
+          <p className="text-lg md:text-xl max-w-2xl mx-auto text-white drop-shadow">Explore our collection of articles on mindfulness, productivity, and personal growth.</p>
         </div>
       </div>
       
