@@ -17,6 +17,7 @@ export const users = pgTable("users", {
 export const insertUserSchema = createInsertSchema(users, {
   username: (schema) => schema.min(3, "Username must be at least 3 characters"),
   password: (schema) => schema.min(6, "Password must be at least 6 characters"),
+  email: (schema) => schema.email("Please enter a valid email address").optional().or(z.literal('')),
 }).omit({ id: true, createdAt: true, role: true });
 
 export type InsertUser = z.infer<typeof insertUserSchema>;

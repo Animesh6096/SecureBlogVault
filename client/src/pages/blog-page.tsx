@@ -12,6 +12,8 @@ import { Search, Loader2 } from "lucide-react";
 export default function BlogPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [category, setCategory] = useState("all");
+  const [currentPage, setCurrentPage] = useState(1);
+  const postsPerPage = 6; // Number of posts to display per page
   
   // Fetch all posts
   const { data: posts, isLoading } = useQuery<Post[]>({
@@ -29,8 +31,27 @@ export default function BlogPage() {
     return matchesSearch && matchesCategory;
   });
   
+  // Pagination logic
+  const totalPosts = filteredPosts?.length || 0;
+  const totalPages = Math.ceil(totalPosts / postsPerPage);
+  
+  // Get current posts for the current page
+  const indexOfLastPost = currentPage * postsPerPage;
+  const indexOfFirstPost = indexOfLastPost - postsPerPage;
+  const currentPosts = filteredPosts?.slice(indexOfFirstPost, indexOfLastPost);
+  
+  // Change page
+  const handlePageChange = (pageNumber: number) => {
+    setCurrentPage(pageNumber);
+    // Scroll to top of posts section
+    const postsGrid = document.getElementById('posts-grid');
+    if (postsGrid) {
+      window.scrollTo({ top: postsGrid.offsetTop - 100, behavior: 'smooth' });
+    }
+  };
+  
   // Get unique categories from posts
-  const categories = [...new Set(posts?.map(post => post.category))];
+  const categories = posts ? Array.from(new Set(posts.map(post => post.category))) : [];
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -80,7 +101,7 @@ export default function BlogPage() {
       </div>
       
       {/* Posts Grid */}
-      <section className="py-12 bg-white flex-1">
+      <section id="posts-grid" className="py-12 bg-white flex-1">
         <div className="container mx-auto px-4">
           {isLoading ? (
             <div className="flex justify-center py-20">
@@ -93,20 +114,60 @@ export default function BlogPage() {
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-              {filteredPosts?.map((post) => (
+              {currentPosts?.map((post) => (
                 <PostCard key={post.id} post={post} />
               ))}
             </div>
           )}
           
-          {/* Pagination - Simplified version */}
-          {filteredPosts && filteredPosts.length > 0 && (
-            <div className="mt-12 flex justify-center">
-              <Button variant="outline" className="mx-1">Previous</Button>
-              <Button variant="outline" className="mx-1 bg-muted-blue text-white">1</Button>
-              <Button variant="outline" className="mx-1">2</Button>
-              <Button variant="outline" className="mx-1">3</Button>
-              <Button variant="outline" className="mx-1">Next</Button>
+          {/* Pagination */}
+          {filteredPosts && filteredPosts.length > postsPerPage && (
+            <div className="mt-12 flex flex-wrap justify-center items-center gap-2">
+              <Button 
+                variant="outline" 
+                className="mx-1"
+                onClick={() => currentPage > 1 && handlePageChange(currentPage - 1)}
+                disabled={currentPage === 1}
+              >
+                Previous
+              </Button>
+              
+              {Array.from({ length: totalPages }, (_, i) => i + 1)
+                .filter(page => {
+                  // Show first page, last page, current page, and pages around current page
+                  return page === 1 || 
+                    page === totalPages || 
+                    (page >= currentPage - 1 && page <= currentPage + 1);
+                })
+                .map((page, index, array) => {
+                  // Add ellipsis where pages are skipped
+                  const showEllipsis = index > 0 && page - array[index - 1] > 1;
+                  
+                  return (
+                    <div key={page} className="flex items-center">
+                      {showEllipsis && (
+                        <span className="mx-1 text-gray-500">...</span>
+                      )}
+                      <Button 
+                        variant={currentPage === page ? "default" : "outline"} 
+                        className={`mx-1 ${currentPage === page ? 'bg-muted-blue text-white' : ''}`}
+                        onClick={() => handlePageChange(page)}
+                      >
+                        {page}
+                      </Button>
+                    </div>
+                  );
+                })
+              }
+              
+              <Button 
+                variant="outline" 
+                className="mx-1"
+                onClick={() => currentPage < totalPages && handlePageChange(currentPage + 1)}
+                disabled={currentPage === totalPages}
+              >
+                Next
+              </Button>
             </div>
           )}
         </div>
