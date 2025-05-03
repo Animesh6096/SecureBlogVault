@@ -73,19 +73,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Get a single post by ID
   app.get("/api/posts/:id", async (req, res) => {
     try {
-      const post = await storage.getPostById(parseInt(req.params.id));
-      
+      let post = null;
+      // Try as number (PostgreSQL)
+      if (!isNaN(Number(req.params.id))) {
+        post = await storage.getPostById(Number(req.params.id));
+      }
+      // If not found, try as string (MongoDB)
+      if (!post) {
+        post = await storage.getPostById(req.params.id);
+      }
       if (!post) {
         return res.status(404).json({ message: "Post not found" });
       }
-      
       // Decrypt post content before sending to client
       const decryptedPost = {
         ...post,
         content: decryptData(post.content),
         summary: post.summary ? decryptData(post.summary) : ""
       };
-      
       res.json(decryptedPost);
     } catch (error) {
       console.error("Error fetching post:", error);

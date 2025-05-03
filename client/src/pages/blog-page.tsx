@@ -22,8 +22,14 @@ export default function BlogPage() {
     queryKey: ["/api/posts", { search: searchQuery, category }],
   });
   
+  // Normalize posts to always have an 'id' property
+  const normalizedPosts = posts?.map(post => ({
+    ...post,
+    id: post.id || post._id
+  }));
+  
   // Filter posts by search and category
-  const filteredPosts = posts?.filter(post => {
+  const filteredPosts = normalizedPosts?.filter(post => {
     const matchesSearch = searchQuery === "" || 
       post.title.toLowerCase().includes(searchQuery.toLowerCase()) || 
       post.content.toLowerCase().includes(searchQuery.toLowerCase());
