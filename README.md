@@ -9,8 +9,7 @@
   <b>A clean, minimalistic, and secure blog platform with modern design & robust encryption.</b>
 </p>
 <p align="center">
-  <img alt="GitHub last commit" src="https://img.shields.io/github/last-commit/your-username/SecureBlogVault?color=blue">
-  <img alt="License" src="https://img.shields.io/github/license/your-username/SecureBlogVault">
+  <img alt="GitHub last commit" src="https://img.shields.io/github/last-commit/Animesh6096/SecureBlogVault?color=blue">
   <img alt="Node.js" src="https://img.shields.io/badge/node-%3E=18.0.0-green">
   <img alt="PRs Welcome" src="https://img.shields.io/badge/PRs-welcome-brightgreen.svg">
 </p>
@@ -83,10 +82,6 @@ shared/      # Shared schemas & types
 Pull requests are welcome! For major changes, please open an issue first.
 
 ---
-
-## 📄 License
-
-[MIT](LICENSE)
 
 ---
 
