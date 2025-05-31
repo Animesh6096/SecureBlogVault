@@ -1,49 +1,63 @@
-# Secure Blog Platform
+# SecureBlogVault
 
-A secure, minimalist blog website with encrypted data storage, user authentication, and admin posting capabilities.
+<p align="center">
+  <img src="generated-icon.png" width="120" alt="SecureBlogVault Logo" />
+</p>
 
-## Features
+<h1 align="center">🔒 SecureBlogVault</h1>
+<p align="center">
+  <b>A clean, minimalistic, and secure blog platform with modern design & robust encryption.</b>
+</p>
+<p align="center">
+  <img alt="GitHub last commit" src="https://img.shields.io/github/last-commit/your-username/SecureBlogVault?color=blue">
+  <img alt="License" src="https://img.shields.io/github/license/your-username/SecureBlogVault">
+  <img alt="Node.js" src="https://img.shields.io/badge/node-%3E=18.0.0-green">
+  <img alt="PRs Welcome" src="https://img.shields.io/badge/PRs-welcome-brightgreen.svg">
+</p>
 
-- User authentication with secure password hashing and salting
-- Encrypted data storage for user information, blog posts, and contact forms
-- Admin panel for managing blog posts
-- Responsive design with clean, minimal aesthetics
-- Support for both PostgreSQL and MongoDB databases
+## ✨ Features
 
-## Security Features
+- 🔑 **User Authentication** — Secure login with password hashing & salting
+- 🛡️ **End-to-End Encryption** — All sensitive data is encrypted in storage
+- 📝 **Admin Panel** — Manage blog posts with ease
+- 📱 **Responsive UI** — Minimal, modern, and mobile-friendly design
+- 🗄️ **Multi-DB Support** — Works with PostgreSQL & MongoDB
+- 🧩 **Modular Codebase** — Clean separation of client, server, and shared logic
 
-1. **Encrypted User Information**: All user data is encrypted in storage
-2. **Password Hashing and Salting**: Using scrypt with salt for secure password storage
-3. **Separate Credential Check Function**: For secure authentication
-4. **Key Management Module**: Secure key generation and rotation
-5. **Encrypted Posts**: All post content is encrypted/decrypted when saving/retrieving
-6. **Comprehensive Encryption**: All sensitive data in the database is encrypted
-7. **Integrity Check with MAC**: Data integrity verification
+## 🛡️ Security Highlights
 
-## Database Options
+- AES-encrypted user & post data
+- Scrypt password hashing with salt
+- Secure key management & rotation
+- Data integrity checks (MAC)
+- Separate credential check logic
 
-The application supports two database systems:
+## 🚀 Quick Start
 
-### PostgreSQL (Default)
+```bash
+# Install dependencies
+npm install
 
-The application uses PostgreSQL with Drizzle ORM by default.
-
-- Start the server: `npm run dev`
-- Seed the database: `npm run db:seed`
-
-### MongoDB
-
-The application also supports MongoDB with Mongoose.
-
-- Start the MongoDB server: `./run-mongodb-server.sh`
-- Seed the MongoDB database: `./run-mongodb-seed.sh`
-
-## Environment Variables
-
-Create a `.env` file in the root directory with the following variables:
-
+# Start the development server (default: PostgreSQL)
+npm run dev
 ```
-# PostgreSQL (Default)
+
+### 🗄️ Database Setup
+
+#### PostgreSQL (Default)
+- Start server: `npm run dev`
+- Seed DB: `npm run db:seed`
+
+#### MongoDB
+- Start MongoDB: `./run-mongodb-server.sh`
+- Seed DB: `./run-mongodb-seed.sh`
+
+## ⚙️ Environment Variables
+
+Create a `.env` file in the root:
+
+```env
+# PostgreSQL
 DATABASE_URL=postgres://user:password@localhost:5432/secure_blog
 
 # MongoDB
@@ -53,27 +67,29 @@ MONGODB_URI=mongodb://localhost:27017/secure_blog
 SESSION_SECRET=your-secret-key
 ```
 
-## Project Structure
+## 🗂️ Project Structure
 
-- `/client`: React frontend with TypeScript
-  - `/src/components`: UI components
-  - `/src/hooks`: Custom React hooks
-  - `/src/lib`: Utility functions
-  - `/src/pages`: Page components
-- `/server`: Express backend
-  - `index.ts`: Main entry point for PostgreSQL
-  - `mongodb-index.ts`: Main entry point for MongoDB
-  - `routes.ts`: API routes for PostgreSQL
-  - `mongodb-routes.ts`: API routes for MongoDB
-  - `auth.ts`: Authentication logic for PostgreSQL
-  - `mongodb-auth.ts`: Authentication logic for MongoDB
-  - `encryption.ts`: Data encryption/decryption utilities
-  - `key-management.ts`: Encryption key management
-- `/db`: Database configuration
-  - `index.ts`: PostgreSQL/Drizzle configuration
-  - `mongodb.ts`: MongoDB/Mongoose configuration
-  - `seed.ts`: PostgreSQL database seeding
-  - `mongodb-seed.ts`: MongoDB database seeding
-- `/shared`: Shared code between frontend and backend
-  - `schema.ts`: PostgreSQL database schema
-  - `mongodb-schema.ts`: MongoDB database schema
+```
+client/      # React frontend (TypeScript)
+server/      # Express backend (TypeScript)
+db/          # Database config & seed scripts
+shared/      # Shared schemas & types
+```
+
+---
+
+## 🤝 Contributing
+
+Pull requests are welcome! For major changes, please open an issue first.
+
+---
+
+## 📄 License
+
+[MIT](LICENSE)
+
+---
+
+<p align="center">
+  <b>Made with ❤️ for security & simplicity</b>
+</p>
