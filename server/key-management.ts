@@ -142,3 +142,16 @@ export function deriveKeyForPurpose(purpose: string): Buffer {
   const hmac = createHash('sha256').update(`${purpose}:${masterKey.toString('hex')}`).digest();
   return hmac;
 }
+
+/**
+ * Derive a unique key for a specific user using the master key.
+ *
+ * @param userId The unique identifier for the user
+ * @returns A Buffer containing the derived key for the user
+ */
+export function deriveKeyForUser(userId: string): Buffer {
+  const masterKey = getEncryptionKey();
+  // Combine userId and masterKey to derive a unique key for each user
+  const derivedKey = createHash('sha256').update(`${userId}:${masterKey.toString('hex')}`).digest();
+  return derivedKey;
+}

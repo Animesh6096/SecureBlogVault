@@ -248,7 +248,7 @@ export async function registerMongoDBRoutes(app: Express): Promise<Server> {
     if (!req.isAuthenticated()) return res.sendStatus(401);
     const user = await mongoStorage.getUser(req.user.id);
     res.json({
-      username: user.username,
+      username: user.username ? decryptData(user.username) : "",
       email: user.email,
       bio: user.bio || "",
       image: user.image || "",

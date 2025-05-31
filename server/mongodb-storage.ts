@@ -14,7 +14,8 @@ import MongoStore from "connect-mongo";
 export interface IStorage {
   // User methods
   getUser(id: string): Promise<IUser>;
-  getUserByUsername(username: string): Promise<IUser | null>;
+  getUserByEmail(encryptedEmail: string): Promise<IUser | null>;
+  getUserByUsername(encryptedUsername: string): Promise<IUser | null>;
   createUser(user: Omit<InsertUser, "id">): Promise<IUser>;
   updateUser(id: string, data: { bio?: string; image?: string }): Promise<IUser>;
   
@@ -65,9 +66,18 @@ export class MongoDBStorage implements IStorage {
     }
   }
   
-  async getUserByUsername(username: string): Promise<IUser | null> {
+  async getUserByEmail(encryptedEmail: string): Promise<IUser | null> {
     try {
-      return await User.findOne({ username });
+      return await User.findOne({ email: encryptedEmail });
+    } catch (error) {
+      console.error("Error getting user by email:", error);
+      throw error;
+    }
+  }
+  
+  async getUserByUsername(encryptedUsername: string): Promise<IUser | null> {
+    try {
+      return await User.findOne({ username: encryptedUsername });
     } catch (error) {
       console.error("Error getting user by username:", error);
       throw error;
