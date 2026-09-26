@@ -1,10 +1,14 @@
 import type { Express } from "express";
-import { createServer, type Server } from "http";
-import { setupAuth } from "./auth";
-import { storage } from "./storage";
-import { encryptData, decryptData } from "./encryption";
+import { setupAuth } from "./auth.js";
+import { storage } from "./storage.js";
+import { encryptData, decryptData, safeDecrypt } from "./encryption.js";
 
-export async function registerRoutes(app: Express): Promise<Server> {
+// Post ids are integers; anything else can't match a post
+function parsePostId(raw: string): number | null {
+  return /^\d+$/.test(raw) ? Number(raw) : null;
+}
+
+export function registerRoutes(app: Express): void {
   // Setup authentication routes
   setupAuth(app);
 
@@ -73,15 +77,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Get a single post by ID
   app.get("/api/posts/:id", async (req, res) => {
     try {
-      let post = null;
-      // Try as number (PostgreSQL)
-      if (!isNaN(Number(req.params.id))) {
-        post = await storage.getPostById(Number(req.params.id));
-      }
-      // If not found, try as string (MongoDB)
-      if (!post) {
-        post = await storage.getPostById(req.params.id);
-      }
+      const postId = parsePostId(req.params.id);
+      const post = postId === null ? undefined : await storage.getPostById(postId);
       if (!post) {
         return res.status(404).json({ message: "Post not found" });
       }
@@ -143,8 +140,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
     
     try {
-      const postId = parseInt(req.params.id);
-      const post = await storage.getPostById(postId);
+      const postId = parsePostId(req.params.id);
+      const post = postId === null ? undefined : await storage.getPostById(postId);
       
       if (!post) {
         return res.status(404).json({ message: "Post not found" });
@@ -161,7 +158,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const encryptedContent = encryptData(content);
       const encryptedSummary = summary ? encryptData(summary) : "";
       
-      const updatedPost = await storage.updatePost(postId, {
+      const updatedPost = await storage.updatePost(postId!, {
         title,
         content: encryptedContent,
         summary: encryptedSummary,
@@ -191,8 +188,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
     
     try {
-      const postId = parseInt(req.params.id);
-      const post = await storage.getPostById(postId);
+      const postId = parsePostId(req.params.id);
+      const post = postId === null ? undefined : await storage.getPostById(postId);
       
       if (!post) {
         return res.status(404).json({ message: "Post not found" });
@@ -203,7 +200,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(403).json({ message: "Forbidden" });
       }
       
-      await storage.deletePost(postId);
+      await storage.deletePost(postId!);
       res.status(200).json({ message: "Post deleted successfully" });
     } catch (error) {
       console.error("Error deleting post:", error);
@@ -254,8 +251,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
     const user = await storage.getUser(req.user.id);
     res.json({
       username: user.username,
-      email: user.email,
-      bio: user.bio || "",
+      email: safeDecrypt(user.email),
+      bio: safeDecrypt(user.bio),
       image: user.image || "",
     });
   });
@@ -264,10 +261,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
     if (!req.isAuthenticated()) return res.sendStatus(401);
     const { bio, image } = req.body;
     // Update user in DB
-    await storage.updateUser(req.user.id, { bio, image });
+    await storage.updateUser(req.user.id, { bio: bio ? encryptData(bio) : "", image });
     res.json({ success: true });
   });
 
-  const httpServer = createServer(app);
-  return httpServer;
 }

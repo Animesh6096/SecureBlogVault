@@ -1,10 +1,10 @@
-import express, { type Request, Response, NextFunction } from "express";
-import { registerMongoDBRoutes } from "./mongodb-routes.js";
+import express, { type Express, type Request, Response, NextFunction } from "express";
 import { log } from "./log.js";
 
-// Builds the Express app (API only). Used by the local dev server
-// (server/mongodb-index.ts) and by the Vercel function (api/index.ts).
-export function createApp() {
+// Builds the Express app (API only) around a set of routes. Used by the local
+// dev servers (server/index.ts, server/mongodb-index.ts) and by the Vercel
+// function (api/index.ts).
+export function createApp(registerRoutes: (app: Express) => void) {
   const app = express();
   app.use(express.json());
   app.use(express.urlencoded({ extended: false }));
@@ -39,7 +39,7 @@ export function createApp() {
     next();
   });
 
-  registerMongoDBRoutes(app);
+  registerRoutes(app);
 
   app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
     console.error("Error:", err);

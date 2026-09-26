@@ -123,3 +123,18 @@ export function verifyMAC(data: string, mac: string): boolean {
     return false;
   }
 }
+
+/**
+ * Decrypts a value if it looks like encryptData output, otherwise returns it
+ * unchanged (some fields, e.g. seeded or legacy rows, are stored in plaintext)
+ */
+export function safeDecrypt(value: string | null | undefined): string {
+  if (typeof value !== 'string' || value.split('.').length !== 3) {
+    return value ?? '';
+  }
+  try {
+    return decryptData(value);
+  } catch {
+    return value;
+  }
+}

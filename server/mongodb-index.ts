@@ -1,6 +1,7 @@
 import dotenv from "dotenv";
 import { createServer } from "http";
 import { createApp } from "./app";
+import { registerMongoDBRoutes } from "./mongodb-routes";
 import { setupVite, serveStatic } from "./vite";
 import { log } from "./log";
 
@@ -8,7 +9,7 @@ import { log } from "./log";
 dotenv.config();
 
 (async () => {
-  const app = createApp();
+  const app = createApp(registerMongoDBRoutes);
   const server = createServer(app);
 
   // importantly only setup vite in development and after

@@ -1,6 +1,21 @@
-import { db } from "./index";
-import * as schema from "@shared/schema";
-import { encryptData } from "../server/encryption";
+import dotenv from "dotenv";
+import { scrypt, randomBytes } from "crypto";
+import { promisify } from "util";
+// Load env before db/index reads DATABASE_URL: .env.local comes from `vercel env pull`
+dotenv.config({ path: [".env.local", ".env"] });
+
+const { db, pool } = await import("./index");
+const schema = await import("../shared/schema");
+const { encryptData } = await import("../server/encryption");
+
+const scryptAsync = promisify(scrypt);
+
+// Same format as hashPassword in server/auth.ts
+async function hashPassword(password: string) {
+  const salt = randomBytes(16).toString("hex");
+  const buf = (await scryptAsync(password, salt, 64)) as Buffer;
+  return `${buf.toString("hex")}.${salt}`;
+}
 
 async function seed() {
   try {
@@ -24,8 +39,7 @@ async function seed() {
     let adminId = 0;
 
     if (!adminExists) {
-      // Hash would normally be done in auth.ts, but for seeding we'll use a simple representation
-      const defaultPassword = "$2a$10$randomHashedPasswordExample.salt";
+      const defaultPassword = await hashPassword(process.env.ADMIN_PASSWORD || "admin123");
       
       const [admin] = await db.insert(schema.users)
         .values({
@@ -466,12 +480,13 @@ async function seed() {
       }
     ];
 
-    // Insert posts
-    for (const post of posts) {
+    // Insert posts, oldest first, spaced a few days apart
+    const now = Date.now();
+    for (const [i, post] of posts.entries()) {
       await db.insert(schema.posts)
         .values({
           ...post,
-          createdAt: new Date(),
+          createdAt: new Date(now - (posts.length - i) * 3 * 24 * 60 * 60 * 1000),
         });
     }
 
@@ -480,7 +495,10 @@ async function seed() {
     console.log("Database seeding completed successfully!");
   } catch (error) {
     console.error("Error seeding database:", error);
+    process.exitCode = 1;
+  } finally {
+    await pool.end();
   }
 }
 
-seed();
+await seed();

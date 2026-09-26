@@ -1,10 +1,9 @@
-import { db } from "@db";
+import { db, pool } from "../db/index.js";
 import connectPg from "connect-pg-simple";
 import session from "express-session";
-import { pool } from "@db";
-import { eq, desc, and, like, or } from "drizzle-orm";
-import * as schema from "@shared/schema";
-import { Post, InsertPost, Subscriber, Contact, User } from "@shared/schema";
+import { eq, desc, ilike, and } from "drizzle-orm";
+import * as schema from "../shared/schema.js";
+import type { Post, InsertPost, Subscriber, Contact, User } from "../shared/schema.js";
 
 // Session store setup with PostgreSQL
 const PostgresSessionStore = connectPg(session);
@@ -12,6 +11,7 @@ const PostgresSessionStore = connectPg(session);
 export interface IStorage {
   getUser(id: number): Promise<User>;
   getUserByUsername(username: string): Promise<User | undefined>;
+  getAllUsers(): Promise<User[]>;
   createUser(user: Omit<schema.InsertUser, "id">): Promise<User>;
   
   getAllPosts(search?: string, category?: string): Promise<Post[]>;
@@ -23,18 +23,20 @@ export interface IStorage {
   deletePost(id: number): Promise<void>;
   
   addSubscriber(email: string): Promise<Subscriber>;
-  saveContactForm(data: Omit<Contact, "id" | "createdAt">): Promise<Contact>;
+  saveContactForm(data: Omit<Contact, "id" | "createdAt" | "read">): Promise<Contact>;
   
-  sessionStore: session.SessionStore;
+  sessionStore: session.Store;
 }
 
 class DatabaseStorage implements IStorage {
-  sessionStore: session.SessionStore;
+  sessionStore: session.Store;
 
   constructor() {
+    // The "session" table is created by db/setup.ts (createTableIfMissing reads
+    // a SQL file from node_modules, which isn't bundled into the Vercel function)
     this.sessionStore = new PostgresSessionStore({
-      pool,
-      createTableIfMissing: true,
+      pool: pool as any,
+      tableName: "session",
     });
   }
 
@@ -52,12 +54,15 @@ class DatabaseStorage implements IStorage {
   }
 
   async getUserByUsername(username: string): Promise<User | undefined> {
-    // Case insensitive search for username
     const user = await db.query.users.findFirst({
       where: eq(schema.users.username, username)
     });
     
     return user;
+  }
+
+  async getAllUsers(): Promise<User[]> {
+    return await db.select().from(schema.users);
   }
 
   async createUser(user: Omit<schema.InsertUser, "id">): Promise<User> {
@@ -78,26 +83,19 @@ class DatabaseStorage implements IStorage {
 
   // Post operations
   async getAllPosts(search?: string, category?: string): Promise<Post[]> {
-    let query = db.select().from(schema.posts);
-    
-    // Apply filters if provided
+    // Content is encrypted at rest, so search matches titles only
+    const conditions = [];
     if (search) {
-      query = query.where(
-        or(
-          like(schema.posts.title, `%${search}%`),
-          like(schema.posts.content, `%${search}%`)
-        )
-      );
+      conditions.push(ilike(schema.posts.title, `%${search}%`));
     }
-    
     if (category && category !== "all") {
-      query = query.where(eq(schema.posts.category, category));
+      conditions.push(eq(schema.posts.category, category));
     }
-    
-    // Order by creation date, newest first
-    query = query.orderBy(desc(schema.posts.createdAt));
-    
-    return await query;
+
+    return await db.select()
+      .from(schema.posts)
+      .where(conditions.length ? and(...conditions) : undefined)
+      .orderBy(desc(schema.posts.createdAt));
   }
 
   async getFeaturedPosts(): Promise<Post[]> {
@@ -125,10 +123,7 @@ class DatabaseStorage implements IStorage {
 
   async createPost(post: Omit<InsertPost, "id" | "createdAt">): Promise<Post> {
     const [newPost] = await db.insert(schema.posts)
-      .values({
-        ...post,
-        createdAt: new Date().toISOString(),
-      })
+      .values(post)
       .returning();
       
     return newPost;
@@ -136,7 +131,7 @@ class DatabaseStorage implements IStorage {
 
   async updatePost(id: number, post: Partial<Omit<InsertPost, "id" | "createdAt">>): Promise<Post> {
     const [updatedPost] = await db.update(schema.posts)
-      .set(post)
+      .set({ ...post, updatedAt: new Date() })
       .where(eq(schema.posts.id, id))
       .returning();
       
@@ -160,22 +155,16 @@ class DatabaseStorage implements IStorage {
     }
     
     const [newSubscriber] = await db.insert(schema.subscribers)
-      .values({
-        email,
-        createdAt: new Date().toISOString(),
-      })
+      .values({ email })
       .returning();
       
     return newSubscriber;
   }
 
   // Contact form
-  async saveContactForm(data: Omit<Contact, "id" | "createdAt">): Promise<Contact> {
+  async saveContactForm(data: Omit<Contact, "id" | "createdAt" | "read">): Promise<Contact> {
     const [contact] = await db.insert(schema.contacts)
-      .values({
-        ...data,
-        createdAt: new Date().toISOString(),
-      })
+      .values(data)
       .returning();
       
     return contact;
