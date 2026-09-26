@@ -5,8 +5,8 @@ import {
   Subscriber, ISubscriber, 
   Contact, IContact, 
   InsertUser, InsertPost, InsertSubscriber, InsertContact
-} from "@shared/mongodb-schema";
-import { connectDB } from "../db/mongodb";
+} from "../shared/mongodb-schema.js";
+import { connectDB } from "../db/mongodb.js";
 import { Types } from "mongoose";
 import MongoStore from "connect-mongo";
 
@@ -41,8 +41,8 @@ export class MongoDBStorage implements IStorage {
   sessionStore: session.Store;
   
   constructor() {
-    // Connect to MongoDB
-    connectDB();
+    // Connect to MongoDB (errors are logged in connectDB; queries fail until it connects)
+    connectDB().catch(() => {});
     
     // Create session store
     this.sessionStore = MongoStore.create({

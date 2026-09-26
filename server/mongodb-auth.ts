@@ -4,9 +4,9 @@ import { Express } from "express";
 import session from "express-session";
 import { scrypt, randomBytes, timingSafeEqual } from "crypto";
 import { promisify } from "util";
-import { mongoStorage } from "./mongodb-storage";
-import { User, IUser } from "@shared/mongodb-schema";
-import { encryptData, decryptData } from "./encryption";
+import { mongoStorage } from "./mongodb-storage.js";
+import { User, IUser } from "../shared/mongodb-schema.js";
+import { encryptData, decryptData } from "./encryption.js";
 
 declare global {
   namespace Express {
@@ -32,15 +32,40 @@ async function comparePasswords(supplied: string, stored: string) {
 }
 
 // Helper to safely decrypt, fallback to original value if not decryptable
-function safeDecrypt(value: string) {
+// (seeded records store some fields in plaintext)
+export function safeDecrypt(value: string) {
   try {
-    if (typeof value === 'string' && value.length > 0 && value.includes('.')) {
+    if (typeof value === 'string' && value.split('.').length === 3) {
       return decryptData(value);
     }
     return value;
   } catch (e) {
     return value;
   }
+}
+
+// Username and email are encrypted with a random IV, so they can't be queried
+// directly; decrypt each user and compare instead.
+async function findUserByIdentifier(...identifiers: (string | undefined)[]) {
+  const wanted = identifiers.filter(Boolean);
+  const users = await User.find();
+  for (const user of users) {
+    if (wanted.includes(safeDecrypt(user.username)) || wanted.includes(safeDecrypt(user.email))) {
+      return user;
+    }
+  }
+  return null;
+}
+
+// Plain user object for the frontend: no password, encrypted fields decrypted
+function toPublicUser(user: any) {
+  const userResponse = user.toObject();
+  delete userResponse.password;
+  userResponse.username = userResponse.username ? safeDecrypt(userResponse.username) : "";
+  userResponse.email = userResponse.email ? safeDecrypt(userResponse.email) : "";
+  userResponse.bio = userResponse.bio ? safeDecrypt(userResponse.bio) : "";
+  userResponse.fullName = userResponse.fullName ? safeDecrypt(userResponse.fullName) : "";
+  return userResponse;
 }
 
 export function setupMongoDBAuth(app: Express) {
@@ -67,17 +92,7 @@ export function setupMongoDBAuth(app: Express) {
       { usernameField: "identifier" },
       async (identifier, password, done) => {
         try {
-          // Fetch all users
-          const users = await User.find();
-          let foundUser = null;
-          for (const user of users) {
-            let decryptedUsername = safeDecrypt(user.username);
-            let decryptedEmail = safeDecrypt(user.email);
-            if (identifier === decryptedUsername || identifier === decryptedEmail) {
-              foundUser = user;
-              break;
-            }
-          }
+          const foundUser = await findUserByIdentifier(identifier);
           if (!foundUser || !(await comparePasswords(password, foundUser.password))) {
             return done(null, false);
           } else {
@@ -105,9 +120,9 @@ export function setupMongoDBAuth(app: Express) {
 
   app.post("/api/register", async (req, res, next) => {
     try {
-      const existingUser = await mongoStorage.getUserByUsername(req.body.username);
+      const existingUser = await findUserByIdentifier(req.body.username, req.body.email);
       if (existingUser) {
-        return res.status(400).json({ message: "Username already exists" });
+        return res.status(400).json({ message: "Username or email already exists" });
       }
 
       const hashedPassword = await hashPassword(req.body.password);
@@ -127,14 +142,7 @@ export function setupMongoDBAuth(app: Express) {
 
       req.login(user, (err) => {
         if (err) return next(err);
-        // Convert Mongoose document to plain object and remove sensitive data
-        const userResponse = user.toObject();
-        delete userResponse.password;
-        // Decrypt before sending to frontend
-        userResponse.email = userResponse.email ? decryptData(userResponse.email) : "";
-        userResponse.bio = userResponse.bio ? decryptData(userResponse.bio) : "";
-        userResponse.fullName = userResponse.fullName ? decryptData(userResponse.fullName) : "";
-        res.status(201).json(userResponse);
+        res.status(201).json(toPublicUser(user));
       });
     } catch (error) {
       next(error);
@@ -143,13 +151,7 @@ export function setupMongoDBAuth(app: Express) {
 
   app.post("/api/login", passport.authenticate("local"), (req, res) => {
     if (!req.user) return res.status(401).json({ message: "Not authenticated" });
-    const userResponse = req.user.toObject();
-    delete userResponse.password;
-    // Decrypt before sending to frontend
-    userResponse.email = userResponse.email ? decryptData(userResponse.email) : "";
-    userResponse.bio = userResponse.bio ? decryptData(userResponse.bio) : "";
-    userResponse.fullName = userResponse.fullName ? decryptData(userResponse.fullName) : "";
-    res.status(200).json(userResponse);
+    res.status(200).json(toPublicUser(req.user));
   });
 
   app.post("/api/logout", (req, res, next) => {
@@ -161,13 +163,6 @@ export function setupMongoDBAuth(app: Express) {
 
   app.get("/api/user", (req, res) => {
     if (!req.isAuthenticated() || !req.user) return res.sendStatus(401);
-    // Convert Mongoose document to plain object and remove sensitive data
-    const userResponse = req.user.toObject();
-    delete userResponse.password;
-    // Decrypt before sending to frontend
-    userResponse.email = userResponse.email ? decryptData(userResponse.email) : "";
-    userResponse.bio = userResponse.bio ? decryptData(userResponse.bio) : "";
-    userResponse.fullName = userResponse.fullName ? decryptData(userResponse.fullName) : "";
-    res.json(userResponse);
+    res.json(toPublicUser(req.user));
   });
 }

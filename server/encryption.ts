@@ -1,5 +1,5 @@
 import { createCipheriv, createDecipheriv, randomBytes } from 'crypto';
-import { getEncryptionKey } from './key-management';
+import { getEncryptionKey } from './key-management.js';
 
 // Encryption algorithm and IV length
 const ALGORITHM = 'aes-256-gcm';

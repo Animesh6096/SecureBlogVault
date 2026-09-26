@@ -1,10 +1,9 @@
 import type { Express } from "express";
-import { createServer, type Server } from "http";
-import { setupMongoDBAuth } from "./mongodb-auth";
-import { mongoStorage } from "./mongodb-storage";
-import { encryptData, decryptData } from "./encryption";
+import { setupMongoDBAuth, safeDecrypt } from "./mongodb-auth.js";
+import { mongoStorage } from "./mongodb-storage.js";
+import { encryptData, decryptData } from "./encryption.js";
 
-export async function registerMongoDBRoutes(app: Express): Promise<Server> {
+export function registerMongoDBRoutes(app: Express): void {
   // Setup authentication routes using MongoDB
   setupMongoDBAuth(app);
 
@@ -18,7 +17,8 @@ export async function registerMongoDBRoutes(app: Express): Promise<Server> {
       const decryptedPosts = posts.map(post => ({
         ...post.toObject(),
         content: decryptData(post.content),
-        summary: post.summary ? decryptData(post.summary) : ""
+        summary: post.summary ? decryptData(post.summary) : "",
+        author: safeDecrypt(post.author)
       }));
       
       res.json(decryptedPosts);
@@ -37,7 +37,8 @@ export async function registerMongoDBRoutes(app: Express): Promise<Server> {
       const decryptedPosts = posts.map(post => ({
         ...post.toObject(),
         content: decryptData(post.content),
-        summary: post.summary ? decryptData(post.summary) : ""
+        summary: post.summary ? decryptData(post.summary) : "",
+        author: safeDecrypt(post.author)
       }));
       
       res.json(decryptedPosts);
@@ -60,7 +61,8 @@ export async function registerMongoDBRoutes(app: Express): Promise<Server> {
       const decryptedPosts = posts.map(post => ({
         ...post.toObject(),
         content: decryptData(post.content),
-        summary: post.summary ? decryptData(post.summary) : ""
+        summary: post.summary ? decryptData(post.summary) : "",
+        author: safeDecrypt(post.author)
       }));
       
       res.json(decryptedPosts);
@@ -83,7 +85,8 @@ export async function registerMongoDBRoutes(app: Express): Promise<Server> {
       const decryptedPost = {
         ...post.toObject(),
         content: decryptData(post.content),
-        summary: post.summary ? decryptData(post.summary) : ""
+        summary: post.summary ? decryptData(post.summary) : "",
+        author: safeDecrypt(post.author)
       };
       
       res.json(decryptedPost);
@@ -114,14 +117,15 @@ export async function registerMongoDBRoutes(app: Express): Promise<Server> {
         category,
         tags,
         authorId: req.user.id,
-        author: req.user.username
+        author: safeDecrypt(req.user.username)
       });
       
       // Decrypt for the response
       const decryptedPost = {
         ...post.toObject(),
         content: decryptData(post.content),
-        summary: post.summary ? decryptData(post.summary) : ""
+        summary: post.summary ? decryptData(post.summary) : "",
+        author: safeDecrypt(post.author)
       };
       
       res.status(201).json(decryptedPost);
@@ -169,7 +173,8 @@ export async function registerMongoDBRoutes(app: Express): Promise<Server> {
       const decryptedPost = {
         ...updatedPost.toObject(),
         content: decryptData(updatedPost.content),
-        summary: updatedPost.summary ? decryptData(updatedPost.summary) : ""
+        summary: updatedPost.summary ? decryptData(updatedPost.summary) : "",
+        author: safeDecrypt(updatedPost.author)
       };
       
       res.json(decryptedPost);
@@ -248,9 +253,9 @@ export async function registerMongoDBRoutes(app: Express): Promise<Server> {
     if (!req.isAuthenticated()) return res.sendStatus(401);
     const user = await mongoStorage.getUser(req.user.id);
     res.json({
-      username: user.username ? decryptData(user.username) : "",
-      email: user.email,
-      bio: user.bio || "",
+      username: user.username ? safeDecrypt(user.username) : "",
+      email: user.email ? safeDecrypt(user.email) : "",
+      bio: user.bio ? safeDecrypt(user.bio) : "",
       image: user.image || "",
     });
   });
@@ -263,6 +268,4 @@ export async function registerMongoDBRoutes(app: Express): Promise<Server> {
     res.json({ success: true });
   });
 
-  const httpServer = createServer(app);
-  return httpServer;
 }
